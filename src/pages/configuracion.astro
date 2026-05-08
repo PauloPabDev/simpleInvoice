@@ -6,7 +6,7 @@ import SettingsWorkspace from '../components/settings/SettingsWorkspace.astro';
 ---
 
 <AppLayout title="Configuración — Cuenta de Cobro" current="configuracion" suffix="Configuración">
-  <style slot="head">
+  <style is:global slot="head">
     body { padding: var(--page-pad) var(--page-pad) clamp(56px, 8vw, 80px); }
     .page { max-width: 1160px; margin: 0 auto; width: 100%; }
 
@@ -298,9 +298,10 @@ import SettingsWorkspace from '../components/settings/SettingsWorkspace.astro';
     <ConfigIntro />
     <WizardTabs />
     <SettingsWorkspace />
-  <script slot="scripts">
-    import { initSettingsPage } from '../scripts/pages/settings-page.js';
-
-    initSettingsPage();
-  </script>
 </AppLayout>
+
+<script>
+  import { initSettingsPage } from '../scripts/pages/settings-page.js';
+
+  initSettingsPage();
+</script>

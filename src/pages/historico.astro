@@ -167,12 +167,12 @@ const defaultData = JSON.stringify(defaultInvoice);
   <HistoryHero />
   <div id="history-root"></div>
 
-  <script slot="scripts" type="application/json" id="default-invoice" set:html={defaultData}></script>
-
-  <script slot="scripts">
-    import { initHistoryPage } from '../scripts/pages/history-page.js';
-
-    const defaultInvoice = JSON.parse(document.getElementById('default-invoice').textContent);
-    initHistoryPage(defaultInvoice);
-  </script>
+  <script is:inline slot="scripts" type="application/json" id="default-invoice" set:html={defaultData}></script>
 </AppLayout>
+
+<script>
+  import { initHistoryPage } from '../scripts/pages/history-page.js';
+
+  const defaultInvoice = JSON.parse(document.getElementById('default-invoice')!.textContent!);
+  initHistoryPage(defaultInvoice);
+</script>

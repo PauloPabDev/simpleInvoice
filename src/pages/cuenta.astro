@@ -2,6 +2,7 @@
 import { PROVIDER } from '../config/provider';
 import defaultInvoice from '../data/invoice.default.json';
 import { fmtDate, calcTotals } from '../utils/format';
+import type { Invoice } from '../types/invoice';
 import AppLayout from '../layouts/AppLayout.astro';
 
 // ── Components ─────────────────────────────────────────────────
@@ -9,7 +10,7 @@ import DocumentActions from '../components/invoice/DocumentActions.astro';
 import InvoiceDocument from '../components/invoice/InvoiceDocument.astro';
 
 // ── Server-side data + calculations ───────────────────────────
-const inv = defaultInvoice;
+const inv = defaultInvoice as Invoice;
 const { subtotal, retentionAmt, total } = calcTotals(inv);
 
 const statusLabel = inv.status === 'paid' ? 'Pagado' : 'Pendiente de pago';
@@ -22,7 +23,7 @@ const defaultData = JSON.stringify({ invoice: inv, provider: PROVIDER });
 ---
 
 <AppLayout title="Cuenta de Cobro" current="cuenta">
-  <style slot="head">
+  <style is:global slot="head">
     /* ── Page shell (screen-only, not part of invoice) ── */
     body { padding: var(--page-pad) var(--page-pad) clamp(56px, 8vw, 80px); }
     .page { max-width: 780px; margin: 0 auto; width: 100%; }
@@ -91,11 +92,11 @@ const defaultData = JSON.stringify({ invoice: inv, provider: PROVIDER });
        Reads state from localStorage (set by editor) or default
        data, then re-renders the invoice DOM when data changes.
        ══════════════════════════════════════════════════════════ -->
-  <script slot="scripts" type="application/json" id="default-data" set:html={defaultData}></script>
-
-  <script slot="scripts">
-    import { initInvoicePage } from '../scripts/pages/invoice-page.js';
-
-    initInvoicePage();
-  </script>
+  <script is:inline slot="scripts" type="application/json" id="default-data" set:html={defaultData}></script>
 </AppLayout>
+
+<script>
+  import { initInvoicePage } from '../scripts/pages/invoice-page.js';
+
+  initInvoicePage();
+</script>

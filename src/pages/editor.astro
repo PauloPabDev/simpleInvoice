@@ -12,7 +12,7 @@ const defaultData = JSON.stringify({
 ---
 
 <AppLayout title="Editor — Cuenta de Cobro" current="editor" suffix="Editor">
-  <style slot="head">
+  <style is:global slot="head">
     body {
       padding: var(--page-pad) var(--page-pad) clamp(56px, 8vw, 80px);
     }
@@ -120,15 +120,16 @@ const defaultData = JSON.stringify({
   <EditorWorkspace />
 
   <script
+    is:inline
     slot="scripts"
     type="application/json"
     id="default-data"
     set:html={defaultData}
   />
-
-  <script slot="scripts">
-    import { initEditorPage } from "../scripts/pages/editor-page.js";
-
-    initEditorPage();
-  </script>
 </AppLayout>
+
+<script>
+  import { initEditorPage } from "../scripts/pages/editor-page.js";
+
+  initEditorPage();
+</script>
