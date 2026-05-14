@@ -1,6 +1,7 @@
 import { applySettingsToPage, getSettings, escapeHtml } from '../app-settings.js';
-import { deleteQuoteRecord, listQuotes } from '../quote-store.js';
+import { deleteQuoteRecord, listQuotes, saveQuote } from '../quote-store.js';
 import { registerPwa } from '../invoice-store.js';
+import { wireJsonPasteModal } from '../json-paste-modal.js';
 
 function fmtDate(iso) {
   if (!iso) return 'Sin fecha';
@@ -149,13 +150,19 @@ export function initQuotesHistoryPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `cotizacion-${record.documentNumber}.json`;
+      a.download = `cotizacion-${record.id}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
   });
 
   search.addEventListener('input', render);
+
+  const pasteModal = wireJsonPasteModal('json-paste-modal', async (parsed) => {
+    await saveQuote(parsed);
+    await refresh();
+  });
+  document.getElementById('btn-paste-json')?.addEventListener('click', () => pasteModal?.open());
 
   registerPwa();
   applySettingsToPage(getSettings());

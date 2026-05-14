@@ -10,15 +10,11 @@ interface Props {
 
 const { current = 'inicio', suffix = '' } = Astro.props;
 
-const links: Array<{ key: NavKey; href: string; label: string; primary?: boolean }> = [
-  { key: 'inicio', href: '/', label: 'Inicio' },
-  { key: 'editor', href: '/editor', label: 'Nueva cuenta', primary: current === 'inicio' },
-  { key: 'cuenta', href: '/cuenta', label: 'Ver cuenta' },
-  { key: 'historico', href: '/historico', label: 'Histórico' },
-  { key: 'cotizacion', href: '/cotizacion', label: 'Cotización' },
-  { key: 'cotizaciones', href: '/cotizaciones', label: 'Cotizaciones' },
-  { key: 'configuracion', href: '/configuracion', label: 'Configuración' },
-];
+const cuentasGroup: NavKey[] = ['editor', 'cuenta', 'historico'];
+const cotizacionesGroup: NavKey[] = ['cotizacion-editor', 'cotizacion', 'cotizaciones'];
+
+const cuentasActive   = cuentasGroup.includes(current);
+const cotizacionesActive = cotizacionesGroup.includes(current);
 ---
 
 <header class="app-nav" aria-label="Navegación principal">
@@ -31,15 +27,81 @@ const links: Array<{ key: NavKey; href: string; label: string; primary?: boolean
   </a>
 
   <nav class="app-nav-actions" aria-label="Secciones">
-    {links.map((link) => (
-      <a
-        href={link.href}
-        class:list={['btn', 'btn-sm', link.primary ? 'btn-primary' : 'btn-ghost', current === link.key && 'is-active']}
-        aria-current={current === link.key ? 'page' : undefined}
-      >
-        {link.label}
-      </a>
-    ))}
+
+    <!-- Inicio -->
+    <a
+      href="/"
+      class:list={['btn', 'btn-sm', 'btn-ghost', current === 'inicio' && 'is-active']}
+      aria-current={current === 'inicio' ? 'page' : undefined}
+    >
+      Inicio
+    </a>
+
+    <!-- Cuentas dropdown -->
+    <details class:list={['nav-dropdown', cuentasActive && 'is-active']} open={cuentasActive || undefined}>
+      <summary class="btn btn-sm btn-ghost">
+        Cuentas
+        <svg class="nav-chevron" width="10" height="10" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </summary>
+      <div class="nav-dropdown-menu">
+        <a
+          href="/editor"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'editor' && 'is-active']}
+          aria-current={current === 'editor' ? 'page' : undefined}
+        >Nueva cuenta</a>
+        <a
+          href="/cuenta"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'cuenta' && 'is-active']}
+          aria-current={current === 'cuenta' ? 'page' : undefined}
+        >Ver cuenta</a>
+        <a
+          href="/historico"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'historico' && 'is-active']}
+          aria-current={current === 'historico' ? 'page' : undefined}
+        >Histórico</a>
+      </div>
+    </details>
+
+    <!-- Cotizaciones dropdown -->
+    <details class:list={['nav-dropdown', cotizacionesActive && 'is-active']} open={cotizacionesActive || undefined}>
+      <summary class="btn btn-sm btn-ghost">
+        Cotizaciones
+        <svg class="nav-chevron" width="10" height="10" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </summary>
+      <div class="nav-dropdown-menu">
+        <a
+          href="/cotizacion-editor?new=1"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'cotizacion-editor' && 'is-active']}
+          aria-current={current === 'cotizacion-editor' ? 'page' : undefined}
+        >Nueva cotización</a>
+        <a
+          href="/cotizacion"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'cotizacion' && 'is-active']}
+          aria-current={current === 'cotizacion' ? 'page' : undefined}
+        >Ver cotización</a>
+        <a
+          href="/cotizaciones"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'cotizaciones' && 'is-active']}
+          aria-current={current === 'cotizaciones' ? 'page' : undefined}
+        >Historial</a>
+      </div>
+    </details>
+
+    <!-- Configuración -->
+    <a
+      href="/configuracion"
+      class:list={['btn', 'btn-sm', 'btn-ghost', current === 'configuracion' && 'is-active']}
+      aria-current={current === 'configuracion' ? 'page' : undefined}
+    >
+      Configuración
+    </a>
+
   </nav>
 </header>
 
@@ -77,6 +139,71 @@ const links: Array<{ key: NavKey; href: string; label: string; primary?: boolean
     background: var(--gold-subtle);
   }
 
+  /* ── Dropdown ──────────────────────────────────────────────── */
+  .nav-dropdown {
+    position: relative;
+  }
+
+  .nav-dropdown > summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .nav-dropdown > summary::-webkit-details-marker { display: none; }
+
+  .nav-chevron {
+    transition: transform .18s ease;
+    flex-shrink: 0;
+    opacity: .7;
+  }
+  .nav-dropdown[open] > summary .nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 172px;
+    background: #fff;
+    border: 1.5px solid var(--warm-border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-md);
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 100;
+  }
+
+  .nav-dropdown-menu .btn {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: var(--r-md);
+    border-color: transparent;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  .nav-dropdown-menu .btn:hover {
+    background: var(--gold-subtle);
+    color: var(--gold-dark);
+    border-color: transparent;
+  }
+  .nav-dropdown-menu .btn.is-active {
+    background: var(--gold-subtle);
+    color: var(--gold-dark);
+    border-color: var(--gold);
+  }
+
+  .nav-dropdown.is-active > summary {
+    border-color: var(--gold);
+    color: var(--gold-dark);
+    background: var(--gold-subtle);
+  }
+
+  /* ── Mobile ─────────────────────────────────────────────────── */
   @media (max-width: 760px) {
     .app-nav {
       margin-bottom: 26px;
@@ -97,11 +224,44 @@ const links: Array<{ key: NavKey; href: string; label: string; primary?: boolean
       justify-content: center;
       min-width: 0;
     }
+
+    .nav-dropdown {
+      position: static;
+    }
+
+    .nav-dropdown > summary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .nav-dropdown-menu {
+      position: static;
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      padding: 4px 0 0 0;
+      margin-top: 0;
+      gap: 4px;
+      grid-column: 1 / -1;
+    }
+
+    .nav-dropdown-menu .btn {
+      border: 1.5px solid var(--warm-border);
+      border-radius: var(--r-full);
+      background: transparent;
+      justify-content: center;
+      font-size: 12px;
+    }
   }
 
   @media (max-width: 440px) {
     .app-nav-actions {
       grid-template-columns: 1fr;
+    }
+
+    .nav-dropdown-menu {
+      grid-column: 1;
     }
   }
 
@@ -111,3 +271,14 @@ const links: Array<{ key: NavKey; href: string; label: string; primary?: boolean
     }
   }
 </style>
+
+<script>
+  // Close dropdown when clicking outside (desktop only)
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.nav-dropdown[open]').forEach(details => {
+      if (!details.contains(e.target)) {
+        details.removeAttribute('open');
+      }
+    });
+  });
+</script>

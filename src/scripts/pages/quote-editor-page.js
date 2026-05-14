@@ -60,22 +60,141 @@ export function initQuoteEditorPage() {
         description: val('qf-disc-desc'),
         amount:      parseFloat(val('qf-disc-amount') || '0'),
       },
-      phases:      readCurrentRecord('phases'),
+      phases:       readPhases(),
       deliverables: parseLines(val('qf-deliverables')),
       exclusions:   parseLines(val('qf-exclusions')),
-      timingRows:   readCurrentRecord('timingRows'),
-      timingTotal:  readCurrentRecord('timingTotal'),
-      paymentSteps: readCurrentRecord('paymentSteps'),
+      timingRows:   readTimingRows(),
+      timingTotal:  val('qf-timing-total'),
+      paymentSteps: readPaymentSteps(),
       conditions:   parseLines(val('qf-conditions')),
       notes:        val('qf-notes'),
     };
   }
 
-  function readCurrentRecord(field) {
-    // Preserve the current record's phases/timing/paymentSteps
-    // (these are not editable in this form yet)
-    const base = currentRecord?.quote ?? defaultData.quote;
-    return base[field] ?? defaultData.quote[field];
+  const TRASH_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+
+  function phaseCardHtml(phase, idx) {
+    const e = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `
+      <div class="item-card qphase-card" data-idx="${idx}">
+        <div class="item-card-top">
+          <div class="field" style="flex:0 0 160px;">
+            <label>Nombre de la fase</label>
+            <input class="qphase-name" type="text" value="${e(phase.name || '')}" placeholder="Planeación" />
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Tiempo estimado</label>
+            <input class="qphase-time mono" type="text" value="${e(phase.time || '')}" placeholder="1–2 DÍAS" />
+          </div>
+          <button class="remove-btn qphase-remove" title="Eliminar fase" aria-label="Eliminar fase">${TRASH_SVG}</button>
+        </div>
+        <div class="field">
+          <label>Puntos clave <span class="field-hint">(uno por línea)</span></label>
+          <textarea class="qphase-bullets" rows="3" placeholder="Recolección de info&#10;Definición del alcance">${e((phase.bullets || []).join('\n'))}</textarea>
+        </div>
+      </div>
+    `;
+  }
+
+  function timingCardHtml(row, idx) {
+    const e = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `
+      <div class="item-card qtiming-card" data-idx="${idx}">
+        <div class="item-card-top">
+          <div class="field" style="flex:1;">
+            <label>Fase</label>
+            <input class="qtiming-phase" type="text" value="${e(row.phase || '')}" placeholder="Planeación" />
+          </div>
+          <div class="field" style="flex:0 0 200px;">
+            <label>Tiempo</label>
+            <input class="qtiming-time mono" type="text" value="${e(row.time || '')}" placeholder="1 a 2 días" />
+          </div>
+          <button class="remove-btn qtiming-remove" title="Eliminar fila" aria-label="Eliminar fila">${TRASH_SVG}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function paymentCardHtml(step, idx) {
+    const e = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `
+      <div class="item-card qpayment-card" data-idx="${idx}">
+        <div class="item-card-top">
+          <div class="field" style="flex:0 0 110px;">
+            <label>Porcentaje (%)</label>
+            <input class="qpayment-pct mono" type="number" value="${step.percentage ?? ''}" min="0" max="100" placeholder="40" />
+          </div>
+          <div class="field" style="flex:0 0 180px;">
+            <label>Nombre</label>
+            <input class="qpayment-name" type="text" value="${e(step.name || '')}" placeholder="Para iniciar" />
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Descripción</label>
+            <input class="qpayment-desc" type="text" value="${e(step.description || '')}" placeholder="Anticipo al firmar…" />
+          </div>
+          <button class="remove-btn qpayment-remove" title="Eliminar paso" aria-label="Eliminar paso">${TRASH_SVG}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function readPhases() {
+    return Array.from(document.querySelectorAll('.qphase-card')).map(card => ({
+      name:    card.querySelector('.qphase-name').value,
+      time:    card.querySelector('.qphase-time').value,
+      bullets: parseLines(card.querySelector('.qphase-bullets').value),
+    }));
+  }
+
+  function readTimingRows() {
+    return Array.from(document.querySelectorAll('.qtiming-card')).map(card => ({
+      phase: card.querySelector('.qtiming-phase').value,
+      time:  card.querySelector('.qtiming-time').value,
+    }));
+  }
+
+  function readPaymentSteps() {
+    return Array.from(document.querySelectorAll('.qpayment-card')).map(card => ({
+      percentage:  parseFloat(card.querySelector('.qpayment-pct').value || '0'),
+      name:        card.querySelector('.qpayment-name').value,
+      description: card.querySelector('.qpayment-desc').value,
+    }));
+  }
+
+  function renderPhasesList(phases) {
+    document.getElementById('qphases-list').innerHTML = phases.map((p, i) => phaseCardHtml(p, i)).join('');
+  }
+
+  function renderTimingList(rows) {
+    document.getElementById('qtiming-list').innerHTML = rows.map((r, i) => timingCardHtml(r, i)).join('');
+  }
+
+  function renderPaymentList(steps) {
+    document.getElementById('qpayment-list').innerHTML = steps.map((s, i) => paymentCardHtml(s, i)).join('');
+  }
+
+  function addPhase() {
+    const phases = readPhases();
+    phases.push({ name: '', time: '', bullets: [] });
+    renderPhasesList(phases);
+    markDirty();
+    document.querySelectorAll('.qphase-card')[phases.length - 1]?.querySelector('.qphase-name')?.focus();
+  }
+
+  function addTimingRow() {
+    const rows = readTimingRows();
+    rows.push({ phase: '', time: '' });
+    renderTimingList(rows);
+    markDirty();
+    document.querySelectorAll('.qtiming-card')[rows.length - 1]?.querySelector('.qtiming-phase')?.focus();
+  }
+
+  function addPaymentStep() {
+    const steps = readPaymentSteps();
+    steps.push({ percentage: 0, name: '', description: '' });
+    renderPaymentList(steps);
+    markDirty();
+    document.querySelectorAll('.qpayment-card')[steps.length - 1]?.querySelector('.qpayment-pct')?.focus();
   }
 
   function readItems() {
@@ -117,6 +236,12 @@ export function initQuoteEditorPage() {
 
     // Items
     renderItemsList(quote.items || []);
+
+    // Phases / timing / payment
+    renderPhasesList(quote.phases || []);
+    renderTimingList(quote.timingRows || []);
+    set('qf-timing-total', quote.timingTotal || '');
+    renderPaymentList(quote.paymentSteps || []);
 
     // Discount
     const discEl = document.getElementById('qf-disc-enabled');
@@ -339,6 +464,37 @@ export function initQuoteEditorPage() {
       updatePreview();
     });
 
+    // Phases
+    document.getElementById('qadd-phase-btn')?.addEventListener('click', addPhase);
+    document.getElementById('qphases-list')?.addEventListener('click', e => {
+      if (e.target.closest('.qphase-remove')) {
+        e.target.closest('.qphase-card').remove();
+        markDirty();
+      }
+    });
+    document.getElementById('qphases-list')?.addEventListener('input', markDirty);
+
+    // Timing rows
+    document.getElementById('qadd-timing-btn')?.addEventListener('click', addTimingRow);
+    document.getElementById('qtiming-list')?.addEventListener('click', e => {
+      if (e.target.closest('.qtiming-remove')) {
+        e.target.closest('.qtiming-card').remove();
+        markDirty();
+      }
+    });
+    document.getElementById('qtiming-list')?.addEventListener('input', markDirty);
+    document.getElementById('qf-timing-total')?.addEventListener('input', markDirty);
+
+    // Payment steps
+    document.getElementById('qadd-payment-btn')?.addEventListener('click', addPaymentStep);
+    document.getElementById('qpayment-list')?.addEventListener('click', e => {
+      if (e.target.closest('.qpayment-remove')) {
+        e.target.closest('.qpayment-card').remove();
+        markDirty();
+      }
+    });
+    document.getElementById('qpayment-list')?.addEventListener('input', markDirty);
+
     // Discount toggle
     document.getElementById('qf-disc-enabled')?.addEventListener('change', e => {
       toggleDiscount(e.target.checked);
@@ -368,11 +524,13 @@ export function initQuoteEditorPage() {
     applySettingsToPage(getSettings());
 
     const provider = getProviderFromSettings();
-    const id = new URLSearchParams(window.location.search).get('id');
+    const params = new URLSearchParams(window.location.search);
+    const id    = params.get('id');
+    const isNew = params.get('new') === '1';
 
     if (id) {
       currentRecord = await getQuoteRecord(id);
-    } else {
+    } else if (!isNew) {
       currentRecord = await getActiveQuoteRecord();
     }
 

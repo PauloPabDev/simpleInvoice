@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import JsonPasteModal from '../components/JsonPasteModal.astro';
 ---
 
 <AppLayout title="Cotizaciones — Panel" current="cotizaciones" suffix="Cotizaciones">
@@ -170,10 +171,18 @@ import AppLayout from '../layouts/AppLayout.astro';
         o número de documento.
       </p>
       <div class="hero-cta">
-        <a class="btn btn-primary btn-sm" href="/cotizacion">
+        <a class="btn btn-primary btn-sm" href="/cotizacion-editor?new=1">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nueva cotización
         </a>
+        <button class="btn btn-ghost btn-sm" id="btn-paste-json"
+                style="border-color:rgba(255,255,255,.25);color:#fff;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Pegar JSON
+        </button>
         <a class="btn btn-ghost btn-sm" href="/historico"
            style="border-color:rgba(255,255,255,.25);color:#fff;">
           Ver cuentas de cobro
@@ -193,6 +202,8 @@ import AppLayout from '../layouts/AppLayout.astro';
 
   <!-- Results -->
   <div id="quotes-history-root"></div>
+
+  <JsonPasteModal modalId="json-paste-modal" />
 </AppLayout>
 
 <script>

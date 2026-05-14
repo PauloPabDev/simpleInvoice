@@ -116,6 +116,28 @@ import QuoteTotalsPreview from './QuoteTotalsPreview.astro';
       <button class="add-item-btn" id="qadd-item-btn">+ Agregar ítem</button>
     </SectionCard>
 
+    <!-- Fases del proyecto -->
+    <SectionCard title="Fases del proyecto" badge="dyn">
+      <div id="qphases-list" class="items-list"></div>
+      <button class="add-item-btn" id="qadd-phase-btn">+ Agregar fase</button>
+    </SectionCard>
+
+    <!-- Tiempos estimados -->
+    <SectionCard title="Tiempos estimados" badge="dyn">
+      <div class="field" style="max-width:320px; margin-bottom:14px;">
+        <label for="qf-timing-total">Total estimado</label>
+        <input type="text" id="qf-timing-total" class="mono" placeholder="11 a 20 días hábiles" />
+      </div>
+      <div id="qtiming-list" class="items-list"></div>
+      <button class="add-item-btn" id="qadd-timing-btn">+ Agregar fila</button>
+    </SectionCard>
+
+    <!-- Forma de pago -->
+    <SectionCard title="Forma de pago" badge="dyn">
+      <div id="qpayment-list" class="items-list"></div>
+      <button class="add-item-btn" id="qadd-payment-btn">+ Agregar paso</button>
+    </SectionCard>
+
     <!-- Descuento -->
     <SectionCard title="Descuento" badge="var">
       <div class="toggle-row">

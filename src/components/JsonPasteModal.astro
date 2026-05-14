@@ -1,0 +1,148 @@
+---
+interface Props {
+  modalId?: string;
+}
+const { modalId = 'json-paste-modal' } = Astro.props;
+---
+
+<div id={modalId} class="json-modal" role="dialog" aria-modal="true"
+     aria-labelledby={`${modalId}-title`} hidden>
+  <div class="json-modal-backdrop"></div>
+  <div class="json-modal-panel">
+    <div class="json-modal-header">
+      <h2 class="json-modal-title" id={`${modalId}-title`}>Pegar JSON</h2>
+      <button class="json-modal-close" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <p class="json-modal-hint">
+      Pega el contenido JSON de una cotización exportada. Esto la importará y guardará en tu historial.
+    </p>
+    <textarea
+      id={`${modalId}-textarea`}
+      class="json-modal-textarea"
+      rows="14"
+      placeholder={'{ "documentNumber": "COT-2026-001", … }'}
+      spellcheck="false"
+    ></textarea>
+    <p class="json-modal-error" id={`${modalId}-error`} hidden></p>
+    <div class="json-modal-actions">
+      <button class="btn btn-ghost btn-sm json-modal-cancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm json-modal-import">Importar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .json-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .json-modal[hidden] { display: none; }
+
+  .json-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(2px);
+  }
+
+  .json-modal-panel {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+    padding: clamp(20px, 4vw, 32px);
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .json-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .json-modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .json-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-600);
+    padding: 4px;
+    border-radius: var(--r-sm);
+    line-height: 0;
+    transition: color .15s;
+    flex-shrink: 0;
+  }
+  .json-modal-close:hover { color: var(--text); }
+
+  .json-modal-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .json-modal-textarea {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 12px;
+    border: 1.5px solid var(--warm-border);
+    border-radius: var(--r-md);
+    resize: vertical;
+    min-height: 220px;
+    background: var(--gray-100);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s, background .15s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .json-modal-textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(242,183,5,.12);
+    background: #fff;
+  }
+
+  .json-modal-error {
+    font-size: 12px;
+    color: #b91c1c;
+    background: #fff2f2;
+    border: 1px solid #fca5a5;
+    border-radius: var(--r-sm);
+    padding: 8px 12px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .json-modal-error[hidden] { display: none; }
+
+  .json-modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+</style>

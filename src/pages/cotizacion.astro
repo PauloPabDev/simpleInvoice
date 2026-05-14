@@ -6,6 +6,7 @@ import type { Quote } from '../types/quote';
 import AppLayout from '../layouts/AppLayout.astro';
 import QuoteActions from '../components/quote/QuoteActions.astro';
 import QuoteDocument from '../components/quote/QuoteDocument.astro';
+import JsonPasteModal from '../components/JsonPasteModal.astro';
 
 // ── Server-side initial render data ─────────────────────────
 const quote = defaultQuote as Quote;
@@ -87,6 +88,8 @@ const defaultData = JSON.stringify({ quote, provider: PROVIDER });
     ¿Necesitas otra cotización? <a href="/cotizaciones">Ver todas las cotizaciones</a>
     o <a href="/editor">crear una cuenta de cobro</a>.
   </p>
+
+  <JsonPasteModal modalId="json-paste-modal" />
 
   <script is:inline slot="scripts" type="application/json" id="default-data" set:html={defaultData}></script>
 </AppLayout>

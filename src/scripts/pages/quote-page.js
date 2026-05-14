@@ -10,6 +10,7 @@ import {
   saveQuote,
 } from '../quote-store.js';
 import { registerPwa } from '../invoice-store.js';
+import { wireJsonPasteModal } from '../json-paste-modal.js';
 
 export function initQuotePage() {
   let state = JSON.parse(document.getElementById('default-data').textContent);
@@ -259,10 +260,18 @@ export function initQuotePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cotizacion-${quote.documentNumber}.json`;
+    a.download = `cotizacion-${currentRecord?.id || quote.documentNumber}.json`;
     a.click();
     URL.revokeObjectURL(url);
   });
+
+  // ── JSON paste modal ────────────────────────────────────────
+  const pasteModal = wireJsonPasteModal('json-paste-modal', async (parsed) => {
+    currentRecord = await saveQuote(parsed);
+    state.quote = currentRecord.quote;
+    render();
+  });
+  document.getElementById('btn-paste-json')?.addEventListener('click', () => pasteModal?.open());
 
   // ── Init ────────────────────────────────────────────────────
   async function init() {
