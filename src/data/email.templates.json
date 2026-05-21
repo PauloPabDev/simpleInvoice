@@ -1,0 +1,278 @@
+[
+  {
+    "templateId": "cotizacion",
+    "name": "Envío de Cotización",
+    "description": "Correo para enviar una cotización al cliente con resumen del proyecto y valor.",
+    "icon": "📄",
+    "variables": ["docNumber", "projectName", "total", "validUntil"],
+    "variableLabels": {
+      "docNumber": "N.° Cotización",
+      "projectName": "Nombre del proyecto",
+      "total": "Valor total",
+      "validUntil": "Válida hasta"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "intro",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Espero que te encuentres muy bien. Te comparto la cotización {{docNumber}} para el proyecto «{{projectName}}», tal como lo conversamos."
+      },
+      {
+        "id": "card",
+        "type": "summary-card",
+        "visible": true,
+        "fields": [
+          { "label": "N.° Cotización", "value": "{{docNumber}}" },
+          { "label": "Proyecto", "value": "{{projectName}}" },
+          { "label": "Valor total", "value": "{{total}}" },
+          { "label": "Válida hasta", "value": "{{validUntil}}" }
+        ]
+      },
+      {
+        "id": "cta",
+        "type": "cta",
+        "visible": true,
+        "text": "Ver cotización completa",
+        "url": ""
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Quedo atento a cualquier pregunta, ajuste o comentario que tengas. Estaré encantado de conversarlo contigo."
+      }
+    ]
+  },
+  {
+    "templateId": "cuenta-cobro",
+    "name": "Envío de Cuenta de Cobro",
+    "description": "Correo para adjuntar y enviar una cuenta de cobro por servicios prestados.",
+    "icon": "🧾",
+    "variables": ["docNumber", "servicePeriod", "total", "dueDate"],
+    "variableLabels": {
+      "docNumber": "N.° Cuenta de cobro",
+      "servicePeriod": "Período de servicio",
+      "total": "Valor a pagar",
+      "dueDate": "Fecha límite de pago"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "intro",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Adjunto encontrarás la cuenta de cobro {{docNumber}} por los servicios prestados durante el período {{servicePeriod}}."
+      },
+      {
+        "id": "card",
+        "type": "summary-card",
+        "visible": true,
+        "fields": [
+          { "label": "N.° Documento", "value": "{{docNumber}}" },
+          { "label": "Período", "value": "{{servicePeriod}}" },
+          { "label": "Valor a pagar", "value": "{{total}}" },
+          { "label": "Fecha límite", "value": "{{dueDate}}" }
+        ]
+      },
+      {
+        "id": "payment",
+        "type": "highlight",
+        "visible": true,
+        "content": "Para cualquier consulta sobre el pago o si necesitas algún soporte adicional, no dudes en escribirme."
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Muchas gracias por tu confianza. Quedo atento a confirmar la transferencia."
+      }
+    ]
+  },
+  {
+    "templateId": "seguimiento",
+    "name": "Seguimiento / Recordatorio",
+    "description": "Recordatorio amable de una cotización o cuenta de cobro enviada anteriormente.",
+    "icon": "🔔",
+    "variables": ["docNumber", "projectName", "sentDate"],
+    "variableLabels": {
+      "docNumber": "N.° Documento",
+      "projectName": "Nombre del proyecto",
+      "sentDate": "Fecha de envío original"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "context",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Hace unos días te envié el documento {{docNumber}} relacionado con «{{projectName}}» y quería hacer un seguimiento para saber si tuviste oportunidad de revisarlo."
+      },
+      {
+        "id": "reminder",
+        "type": "highlight",
+        "visible": true,
+        "content": "Si tienes alguna pregunta, duda o ajuste que necesites, con gusto lo conversamos. Estoy disponible para agendar una llamada rápida si te parece útil."
+      },
+      {
+        "id": "cta",
+        "type": "cta",
+        "visible": true,
+        "text": "Revisar documento",
+        "url": ""
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Espero tu respuesta y quedo atento a lo que necesites."
+      }
+    ]
+  },
+  {
+    "templateId": "pago-recibido",
+    "name": "Confirmación de Pago",
+    "description": "Confirmación de que el pago fue recibido exitosamente.",
+    "icon": "✅",
+    "variables": ["docNumber", "total", "paidDate"],
+    "variableLabels": {
+      "docNumber": "N.° Documento",
+      "total": "Valor recibido",
+      "paidDate": "Fecha de pago"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "confirm",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Con gusto te confirmo que hemos recibido el pago correspondiente al documento {{docNumber}} por un valor de {{total}}."
+      },
+      {
+        "id": "card",
+        "type": "summary-card",
+        "visible": true,
+        "fields": [
+          { "label": "N.° Documento", "value": "{{docNumber}}" },
+          { "label": "Valor recibido", "value": "{{total}}" },
+          { "label": "Fecha de pago", "value": "{{paidDate}}" },
+          { "label": "Estado", "value": "Pagado ✓" }
+        ]
+      },
+      {
+        "id": "thanks",
+        "type": "highlight",
+        "visible": true,
+        "content": "Muchas gracias por tu puntualidad y confianza. Ha sido un placer trabajar contigo en este proyecto."
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Quedo a tu disposición para futuros proyectos. ¡Hasta pronto!"
+      }
+    ]
+  },
+  {
+    "templateId": "bienvenida",
+    "name": "Bienvenida al Proyecto",
+    "description": "Correo de arranque para dar la bienvenida y comunicar los próximos pasos.",
+    "icon": "🚀",
+    "variables": ["projectName", "startDate", "pocName"],
+    "variableLabels": {
+      "projectName": "Nombre del proyecto",
+      "startDate": "Fecha de inicio",
+      "pocName": "Punto de contacto del cliente"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "welcome",
+        "type": "paragraph",
+        "visible": true,
+        "content": "¡Bienvenido/a al proyecto «{{projectName}}»! Estamos muy contentos de comenzar a trabajar contigo. Iniciamos el {{startDate}} y estaremos en contacto constante durante todo el proceso."
+      },
+      {
+        "id": "steps",
+        "type": "highlight",
+        "visible": true,
+        "content": "En los próximos días estaremos enviando los primeros avances y requerimientos iniciales. Tu punto de contacto será {{pocName}}, quien estará disponible para coordinar y resolver cualquier duda."
+      },
+      {
+        "id": "cta",
+        "type": "cta",
+        "visible": true,
+        "text": "Agendar reunión de inicio",
+        "url": ""
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Estamos listos para hacer un gran trabajo juntos. ¡Nos vemos pronto!"
+      }
+    ]
+  },
+  {
+    "templateId": "general",
+    "name": "Correo Corporativo",
+    "description": "Plantilla genérica para cualquier comunicación corporativa formal.",
+    "icon": "✉️",
+    "variables": ["subject"],
+    "variableLabels": {
+      "subject": "Asunto / tema del correo"
+    },
+    "defaultSections": [
+      {
+        "id": "greeting",
+        "type": "greeting",
+        "visible": true,
+        "content": "Hola {{recipientName}},"
+      },
+      {
+        "id": "body",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Me permito escribirte en relación con {{subject}}. Adjunto encontrarás la información pertinente para tu revisión."
+      },
+      {
+        "id": "detail",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Por favor, no dudes en contactarme si tienes alguna pregunta o necesitas información adicional al respecto."
+      },
+      {
+        "id": "closing",
+        "type": "paragraph",
+        "visible": true,
+        "content": "Quedo atento a tu respuesta. Muchas gracias."
+      }
+    ]
+  }
+]

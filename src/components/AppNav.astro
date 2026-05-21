@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 
-type NavKey = 'inicio' | 'cuenta' | 'editor' | 'historico' | 'configuracion' | 'cotizacion' | 'cotizaciones' | 'cotizacion-editor';
+type NavKey = 'inicio' | 'cuenta' | 'editor' | 'historico' | 'configuracion' | 'cotizacion' | 'cotizaciones' | 'cotizacion-editor' | 'correos' | 'correo-editor';
 
 interface Props {
   current?: NavKey;
@@ -12,9 +12,11 @@ const { current = 'inicio', suffix = '' } = Astro.props;
 
 const cuentasGroup: NavKey[] = ['editor', 'cuenta', 'historico'];
 const cotizacionesGroup: NavKey[] = ['cotizacion-editor', 'cotizacion', 'cotizaciones'];
+const correosGroup: NavKey[] = ['correo-editor', 'correos'];
 
 const cuentasActive   = cuentasGroup.includes(current);
 const cotizacionesActive = cotizacionesGroup.includes(current);
+const correosActive = correosGroup.includes(current);
 ---
 
 <header class="app-nav" aria-label="Navegación principal">
@@ -90,6 +92,29 @@ const cotizacionesActive = cotizacionesGroup.includes(current);
           class:list={['btn', 'btn-sm', 'btn-ghost', current === 'cotizaciones' && 'is-active']}
           aria-current={current === 'cotizaciones' ? 'page' : undefined}
         >Historial</a>
+      </div>
+    </details>
+
+    <!-- Correos dropdown -->
+    <details class:list={['nav-dropdown', correosActive && 'is-active']} open={correosActive || undefined}>
+      <summary class="btn btn-sm btn-ghost">
+        Correos
+        <svg class="nav-chevron" width="10" height="10" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </summary>
+      <div class="nav-dropdown-menu">
+        <a
+          href="/correo-editor?new=1"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'correo-editor' && 'is-active']}
+          aria-current={current === 'correo-editor' ? 'page' : undefined}
+        >Nuevo correo</a>
+        <a
+          href="/correos"
+          class:list={['btn', 'btn-sm', 'btn-ghost', current === 'correos' && 'is-active']}
+          aria-current={current === 'correos' ? 'page' : undefined}
+        >Plantillas</a>
       </div>
     </details>
 
@@ -276,7 +301,7 @@ const cotizacionesActive = cotizacionesGroup.includes(current);
   // Close dropdown when clicking outside (desktop only)
   document.addEventListener('click', (e) => {
     document.querySelectorAll('.nav-dropdown[open]').forEach(details => {
-      if (!details.contains(e.target)) {
+      if (!details.contains(e.target as Node)) {
         details.removeAttribute('open');
       }
     });

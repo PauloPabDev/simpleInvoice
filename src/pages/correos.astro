@@ -1,0 +1,330 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import JsonPasteModal from '../components/JsonPasteModal.astro';
+import emailTemplates from '../data/email.templates.json';
+
+const templatesJson = JSON.stringify(emailTemplates);
+---
+
+<AppLayout title="Correos — Plantillas" current="correos" suffix="Correos">
+  <style is:global slot="head">
+    body { padding: var(--page-pad) var(--page-pad) clamp(56px, 8vw, 80px); }
+    .page { max-width: 1080px; margin: 0 auto; width: 100%; }
+
+    /* ── Hero ── */
+    .correos-hero {
+      background: var(--black);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-lg);
+      padding: clamp(24px, 4vw, 34px) clamp(20px, 5vw, 38px);
+      margin-bottom: var(--content-gap);
+      color: #fff;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+      gap: var(--content-gap);
+      align-items: end;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 8px;
+    }
+
+    .correos-title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: .95;
+      color: var(--gold);
+      letter-spacing: -2px;
+      margin-bottom: 12px;
+    }
+
+    .correos-copy {
+      max-width: 56ch;
+      color: rgba(255,255,255,.58);
+      font-size: 14px;
+    }
+
+    .hero-cta { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .search-box {
+      width: 100%;
+      border: 1.5px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      border-radius: var(--r-full);
+      padding: 13px 18px;
+      font-family: var(--font-body);
+      outline: none;
+    }
+    .search-box::placeholder { color: rgba(255,255,255,.38); }
+    .search-box:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(242,183,5,.12);
+    }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 14px;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Template gallery grid ── */
+    .email-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: var(--section-gap);
+    }
+
+    .email-tpl-card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: all .18s ease;
+    }
+
+    .email-tpl-card:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-gold);
+      transform: translateY(-1px);
+    }
+
+    .email-tpl-icon {
+      font-size: 28px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .email-tpl-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .email-tpl-name {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px;
+      letter-spacing: -0.2px;
+    }
+
+    .email-tpl-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .email-tpl-arrow {
+      flex-shrink: 0;
+      color: var(--gray-400);
+      margin-top: 4px;
+      transition: transform .18s ease;
+    }
+
+    .email-tpl-card:hover .email-tpl-arrow {
+      transform: translateX(3px);
+      color: var(--gold-dark);
+    }
+
+    /* ── History section ── */
+    .history-section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .history-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--warm-border);
+    }
+
+    .email-hist-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .email-hist-row:last-child { border-bottom: none; }
+
+    .email-hist-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .email-hist-info { min-width: 0; }
+
+    .email-hist-subject {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+      margin: 0 0 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-hist-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-600);
+      margin: 0;
+      align-items: center;
+    }
+
+    .email-hist-meta .sep { color: var(--gray-400); }
+    .email-hist-meta .date { color: var(--gray-400); }
+
+    .email-hist-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn-danger { color: #a13030; border-color: #efc7c7; }
+    .btn-danger:hover { color: #7f1d1d; border-color: #d97979; background: #fff2f2; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      padding: 36px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state strong {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .empty-state a {
+      color: var(--emerald);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    @media (max-width: 760px) {
+      .correos-hero { grid-template-columns: 1fr; }
+      .email-hist-row {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+      }
+      .email-hist-actions {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .email-hist-actions > * { justify-content: center; }
+    }
+
+    @media (max-width: 440px) {
+      .hero-cta { flex-direction: column; }
+      .hero-cta > * { justify-content: center; }
+      .email-gallery { grid-template-columns: 1fr; }
+      .email-hist-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <!-- Hero -->
+  <div class="correos-hero">
+    <div>
+      <p class="eyebrow">Correos corporativos</p>
+      <h1 class="correos-title">Correos</h1>
+      <p class="correos-copy">
+        Crea y personaliza correos HTML listos para enviar desde Gmail o cualquier
+        cliente de correo. Tus colores y datos de contacto aplicados automáticamente.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-sm" href="/correo-editor?new=1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Nuevo correo
+        </a>
+        <button class="btn btn-ghost btn-sm" id="btn-paste-json"
+                style="border-color:rgba(255,255,255,.25);color:#fff;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Importar JSON
+        </button>
+        <a class="btn btn-ghost btn-sm" href="/cotizaciones"
+           style="border-color:rgba(255,255,255,.25);color:#fff;">
+          Ver cotizaciones
+        </a>
+      </div>
+    </div>
+    <div>
+      <input
+        type="search"
+        id="emails-search"
+        class="search-box"
+        placeholder="Buscar en borradores…"
+        autocomplete="off"
+      />
+    </div>
+  </div>
+
+  <!-- Template Gallery -->
+  <h2 class="section-heading">Plantillas disponibles</h2>
+  <div class="email-gallery" id="emails-gallery">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- History -->
+  <h2 class="section-heading">Borradores guardados</h2>
+  <div class="history-section">
+    <div id="emails-history"></div>
+    <div class="empty-state" id="emails-history-empty" style="display:none;">
+      <strong>Sin borradores aún</strong>
+      Elige una plantilla de arriba para crear tu primer correo corporativo.
+    </div>
+  </div>
+
+  <JsonPasteModal modalId="email-json-modal" />
+
+  <script is:inline slot="scripts" type="application/json" id="emails-templates" set:html={templatesJson}></script>
+</AppLayout>
+
+<script>
+  import { initEmailsPage } from '../scripts/pages/emails-page.js';
+  initEmailsPage();
+</script>

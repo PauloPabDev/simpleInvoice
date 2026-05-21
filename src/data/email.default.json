@@ -1,0 +1,51 @@
+{
+  "templateId": "cotizacion",
+  "subject": "Cotización {{docNumber}} – {{projectName}}",
+  "recipientEmail": "",
+  "recipientName": "María García",
+  "variables": {
+    "docNumber": "COT-2026-001",
+    "projectName": "Sitio web corporativo",
+    "total": "$ 5.100.000",
+    "validUntil": "5 de junio de 2026"
+  },
+  "trackingPixelUrl": "",
+  "sections": [
+    {
+      "id": "greeting",
+      "type": "greeting",
+      "visible": true,
+      "content": "Hola {{recipientName}},"
+    },
+    {
+      "id": "intro",
+      "type": "paragraph",
+      "visible": true,
+      "content": "Espero que te encuentres muy bien. Te comparto la cotización {{docNumber}} para el proyecto «{{projectName}}», tal como lo conversamos."
+    },
+    {
+      "id": "card",
+      "type": "summary-card",
+      "visible": true,
+      "fields": [
+        { "label": "N.° Cotización", "value": "{{docNumber}}" },
+        { "label": "Proyecto", "value": "{{projectName}}" },
+        { "label": "Valor total", "value": "{{total}}" },
+        { "label": "Válida hasta", "value": "{{validUntil}}" }
+      ]
+    },
+    {
+      "id": "cta",
+      "type": "cta",
+      "visible": true,
+      "text": "Ver cotización completa",
+      "url": ""
+    },
+    {
+      "id": "closing",
+      "type": "paragraph",
+      "visible": true,
+      "content": "Quedo atento a cualquier pregunta, ajuste o comentario que tengas. Estaré encantado de conversarlo contigo."
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+---
+import { PROVIDER } from '../config/provider';
+import defaultEmail from '../data/email.default.json';
+import emailTemplates from '../data/email.templates.json';
+import AppLayout from '../layouts/AppLayout.astro';
+import SectionCard from '../components/editor/SectionCard.astro';
+import EmailDocument from '../components/email/EmailDocument.astro';
+import JsonPasteModal from '../components/JsonPasteModal.astro';
+import type { Email } from '../types/email';
+import type { Provider } from '../types/invoice';
+
+const email = defaultEmail as Email;
+const provider = PROVIDER as Provider;
+
+const defaultData = JSON.stringify({ email, provider });
+const templatesJson = JSON.stringify(emailTemplates);
+---
+
+<AppLayout title="Editor — Correo" current="correo-editor" suffix="Correos">
+  <style is:global slot="head">
+    body { padding: var(--page-pad) var(--page-pad) clamp(56px, 8vw, 80px); }
+    .page { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    /* ── Actions bar ── */
+    .editor-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: var(--content-gap);
+    }
+
+    #ef-save-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: var(--r-full);
+      background: var(--gray-100);
+      color: var(--gray-600);
+      transition: all .2s;
+    }
+    #ef-save-badge.saved {
+      background: var(--emerald-subtle);
+      color: var(--emerald-dark);
+    }
+
+    /* ── Split layout ── */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+      gap: var(--section-gap);
+      align-items: start;
+    }
+
+    .form-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--content-gap);
+      min-width: 0;
+    }
+
+    .preview-panel {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Preview label ── */
+    .preview-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray-600);
+      margin-bottom: 4px;
+    }
+
+    /* ── Preview subject ── */
+    .em-subject-bar {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .em-subject-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ── Section body hide ── */
+    .sec-hidden { display: none !important; }
+
+    /* ── Section toggle label ── */
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label input[type=checkbox] {
+      accent-color: var(--emerald);
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ── Card fields layout ── */
+    .em-card-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── Toast ── */
+    #ef-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--black);
+      color: #fff;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: var(--r-full);
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+      z-index: 9999;
+      white-space: nowrap;
+      max-width: calc(100vw - 48px);
+      text-align: center;
+    }
+    #ef-toast.visible { opacity: 1; }
+
+    @media (max-width: 1020px) {
+      .editor-layout { grid-template-columns: 1fr; }
+      .preview-panel { position: static; }
+    }
+
+    @media (max-width: 640px) {
+      .editor-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .editor-actions > * { justify-content: center; min-width: 0; }
+    }
+
+    @media (max-width: 420px) {
+      .editor-actions { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      .app-nav, .editor-actions { display: none !important; }
+      .editor-layout { grid-template-columns: 1fr; }
+      .form-panel { display: none !important; }
+    }
+  </style>
+
+  <!-- ── Actions bar ── -->
+  <div class="editor-actions">
+    <a href="/correos" class="btn btn-sm btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Plantillas
+    </a>
+
+    <button type="button" id="ef-btn-paste-json" class="btn btn-sm btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>
+      Pegar JSON
+    </button>
+
+    <button type="button" id="ef-btn-json-download" class="btn btn-sm btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <polyline points="16 18 22 12 16 6"/>
+        <polyline points="8 6 2 12 8 18"/>
+      </svg>
+      JSON
+    </button>
+
+    <button type="button" id="ef-btn-copy-html" class="btn btn-sm btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Copiar HTML
+    </button>
+
+    <button type="button" id="ef-btn-download" class="btn btn-sm btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Descargar .html
+    </button>
+
+    <button type="button" id="ef-btn-save" class="btn btn-sm btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Guardar
+    </button>
+
+    <span id="ef-save-badge"></span>
+  </div>
+
+  <!-- ── Editor layout ── -->
+  <div class="editor-layout">
+
+    <!-- ── Form panel ── -->
+    <div class="form-panel" id="ef-form-panel">
+
+      <!-- Plantilla selector -->
+      <SectionCard title="Plantilla" badge="const">
+        <input type="hidden" id="ef-template-id" value={email.templateId} />
+        <div class="field">
+          <label for="ef-template-select">Tipo de plantilla</label>
+          <select id="ef-template-select">
+            {emailTemplates.map(tpl => (
+              <option value={tpl.templateId} selected={tpl.templateId === email.templateId}>
+                {tpl.icon} {tpl.name}
+              </option>
+            ))}
+          </select>
+          <span class="field-hint">
+            Al cambiar la plantilla se restablecen las secciones predeterminadas.
+          </span>
+        </div>
+      </SectionCard>
+
+      <!-- Destinatario -->
+      <SectionCard title="Destinatario" badge="var">
+        <div class="field-grid">
+          <div class="field">
+            <label for="ef-recipient-name">Nombre del destinatario</label>
+            <input type="text" id="ef-recipient-name" placeholder="María García" />
+          </div>
+          <div class="field">
+            <label for="ef-recipient-email">Correo del destinatario</label>
+            <input type="email" id="ef-recipient-email" placeholder="contacto@empresa.co" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="ef-subject">Asunto del correo</label>
+          <input type="text" id="ef-subject" placeholder="Cotización COT-2026-001 – Proyecto" />
+        </div>
+      </SectionCard>
+
+      <!-- Pixel de seguimiento -->
+      <SectionCard title="Pixel de visualización" badge="var">
+        <div class="field">
+          <label for="ef-pixel-url">URL del pixel (1×1)</label>
+          <input type="url" id="ef-pixel-url"
+                 placeholder="https://tu-servidor.com/pixel.gif?id=…"
+                 class="mono" />
+          <span class="field-hint">
+            Se inserta como <code>&lt;img&gt;</code> invisible al final del HTML exportado.
+            Déjalo vacío si no necesitas seguimiento.
+          </span>
+        </div>
+      </SectionCard>
+
+      <!-- Remitente (from settings) -->
+      <SectionCard title="Remitente (tú)" badge="const">
+        <p class="field-hint">
+          Datos de tu empresa cargados desde configuración.
+          <a href="/configuracion" style="color:var(--emerald);font-weight:600;text-decoration:none;">Editar →</a>
+        </p>
+        <div class="field-grid">
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="ef-prov-name-disp" readonly />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="text" id="ef-prov-email-disp" class="mono" readonly />
+          </div>
+        </div>
+      </SectionCard>
+
+      <!-- Variables del documento -->
+      <SectionCard title="Variables del documento" badge="var">
+        <p class="field-hint">
+          Estos valores reemplazarán los <code>&#123;&#123;marcadores&#125;&#125;</code> en el contenido.
+        </p>
+        <div class="field-grid" id="ef-variables-container">
+          <!-- Populated by JS based on selected template -->
+        </div>
+      </SectionCard>
+
+      <!-- Secciones del correo -->
+      <SectionCard title="Secciones del correo" badge="dyn">
+        <p class="field-hint">
+          Activa o desactiva secciones, y edita su contenido. Usa <code>&#123;&#123;nombreVariable&#125;&#125;</code> para insertar datos dinámicos.
+        </p>
+        <div id="ef-sections-container">
+          <!-- Populated by JS -->
+        </div>
+      </SectionCard>
+
+    </div>
+
+    <!-- ── Preview panel ── -->
+    <div class="preview-panel">
+      <p class="preview-label">Vista previa</p>
+
+      <!-- Subject bar -->
+      <div class="em-subject-bar">
+        <span class="em-subject-label">Asunto:</span>
+        <span id="em-preview-subject">—</span>
+      </div>
+
+      <!-- Email preview -->
+      <EmailDocument email={email} provider={provider} />
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="ef-toast" role="status"></div>
+
+  <JsonPasteModal modalId="email-json-modal" />
+
+  <!-- Data injection -->
+  <script is:inline slot="scripts" type="application/json" id="eeditor-default-data" set:html={defaultData}></script>
+  <script is:inline slot="scripts" type="application/json" id="eeditor-templates" set:html={templatesJson}></script>
+</AppLayout>
+
+<script>
+  import { initEmailEditorPage } from '../scripts/pages/email-editor-page.js';
+  initEmailEditorPage();
+</script>

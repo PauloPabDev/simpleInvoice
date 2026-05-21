@@ -1,0 +1,304 @@
+---
+/**
+ * EmailDocument — in-browser preview of the email.
+ * Uses modern CSS + CSS variables for the preview.
+ * The JS export function (renderEmailHtml) generates the email-client-safe
+ * table-based version with inline styles for actual sending.
+ */
+import type { Email } from '../../types/email';
+import type { Provider } from '../../types/invoice';
+
+interface Props {
+  email: Email;
+  provider: Provider;
+}
+
+const { email, provider } = Astro.props;
+
+function esc(v: string | undefined) {
+  return String(v || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+---
+
+<div class="email-outer" id="email-root">
+  <div class="email-card">
+
+    <!-- ── Header ── -->
+    <div class="email-header" id="em-header">
+      <div class="em-logo" data-logo-slot data-logo-size="md"></div>
+      <div class="em-brand">
+        <span class="em-brand-name" data-brand-short>Cuenta</span>
+        <span class="em-brand-tag" data-brand-tag>Cobro</span>
+      </div>
+    </div>
+
+    <!-- ── Body ── -->
+    <div class="email-body" id="em-body">
+
+      {email.sections.filter(s => s.visible).map(section => (
+        <>
+          {section.type === 'greeting' && (
+            <p class="em-greeting" id={`em-sec-${section.id}`}>{section.content}</p>
+          )}
+          {section.type === 'paragraph' && (
+            <p class="em-paragraph" id={`em-sec-${section.id}`}>{section.content}</p>
+          )}
+          {section.type === 'highlight' && (
+            <div class="em-highlight" id={`em-sec-${section.id}`}>
+              <p>{section.content}</p>
+            </div>
+          )}
+          {section.type === 'summary-card' && (
+            <div class="em-summary-card" id={`em-sec-${section.id}`}>
+              {(section.fields || []).map(field => (
+                <div class="em-summary-row">
+                  <span class="em-summary-label">{field.label}</span>
+                  <span class="em-summary-value">{field.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {section.type === 'cta' && (
+            <div class="em-cta-wrap" id={`em-sec-${section.id}`}>
+              <a class="em-cta-btn" href={section.url || '#'}>{section.text}</a>
+            </div>
+          )}
+          {section.type === 'divider' && (
+            <hr class="em-divider" id={`em-sec-${section.id}`} />
+          )}
+        </>
+      ))}
+
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="email-footer" id="em-footer">
+      <p class="em-footer-name" id="em-prov-name">{provider.name}</p>
+      <p class="em-footer-meta" id="em-prov-meta">
+        {provider.email && <a href={`mailto:${provider.email}`}>{provider.email}</a>}
+        {provider.email && provider.phone && <span class="em-footer-sep">·</span>}
+        {provider.phone && <span>{provider.phone}</span>}
+        {provider.city && <><span class="em-footer-sep">·</span><span>{provider.city}</span></>}
+      </p>
+      {provider.website && (
+        <p class="em-footer-web" id="em-prov-web">
+          <a href={provider.website}>{provider.website}</a>
+        </p>
+      )}
+    </div>
+
+  </div>
+</div>
+
+<style>
+  /* ── Outer wrapper: simulates the email background ── */
+  .email-outer {
+    background: var(--gray-100);
+    border-radius: var(--r-lg);
+    padding: clamp(16px, 3vw, 32px);
+  }
+
+  /* ── Email card ── */
+  .email-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  /* ── Header ── */
+  .email-header {
+    background: var(--brand-primary);
+    padding: 22px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .em-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .em-brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0F0F0F;
+    letter-spacing: -0.3px;
+    line-height: 1;
+  }
+
+  .em-brand-tag {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(0,0,0,0.55);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── Body ── */
+  .email-body {
+    padding: 32px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .em-greeting {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0F0F0F;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .em-paragraph {
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .em-highlight {
+    background: var(--gold-subtle, #fef9e0);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+  }
+
+  .em-highlight p {
+    font-size: 13.5px;
+    color: #444444;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── Summary card ── */
+  .em-summary-card {
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .em-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid #eeeeee;
+    gap: 12px;
+  }
+
+  .em-summary-row:last-child {
+    border-bottom: none;
+  }
+
+  .em-summary-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #777777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .em-summary-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: right;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  /* ── CTA ── */
+  .em-cta-wrap {
+    text-align: center;
+    padding: 6px 0;
+  }
+
+  .em-cta-btn {
+    display: inline-block;
+    background: var(--brand-primary);
+    color: #0F0F0F !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 8px;
+    letter-spacing: -0.2px;
+    transition: opacity 0.15s;
+  }
+
+  .em-cta-btn:hover {
+    opacity: 0.87;
+  }
+
+  /* ── Divider ── */
+  .em-divider {
+    border: none;
+    border-top: 1px solid #eeeeee;
+    margin: 4px 0;
+  }
+
+  /* ── Footer ── */
+  .email-footer {
+    background: #f9f9f9;
+    border-top: 1px solid #eeeeee;
+    padding: 20px 32px;
+    text-align: center;
+  }
+
+  .em-footer-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222222;
+    margin: 0 0 4px;
+  }
+
+  .em-footer-meta {
+    font-size: 12px;
+    color: #888888;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .em-footer-meta a {
+    color: var(--brand-accent, #17A078);
+    text-decoration: none;
+  }
+
+  .em-footer-sep {
+    color: #cccccc;
+  }
+
+  .em-footer-web {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin: 4px 0 0;
+  }
+
+  .em-footer-web a {
+    color: var(--brand-accent, #17A078);
+    text-decoration: none;
+  }
+
+  /* ── Print ── */
+  @media print {
+    .email-outer { background: none; padding: 0; }
+    .email-card { box-shadow: none; }
+  }
+</style>
